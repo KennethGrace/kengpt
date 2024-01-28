@@ -1,0 +1,26 @@
+{
+  "short_name": "KenGPT",
+  "name": "KenGPT",
+  "description": "KenGPT is a custom-built AI assistant.",
+  "github_url": "https://github.com/kennethgrace/kengpt",
+  "license_name": "GNU GPLv3 License",
+  "license_url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ],
+  "id": "/",
+  "start_url": ".",
+  "scope": "/",
+  "display": "fullscreen",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

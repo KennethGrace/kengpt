@@ -1,0 +1,22 @@
+# Developer Settings
+.vscode
+.idea
+
+# Node Environment
+node_modules
+package-lock.json
+
+# Python Environment
+venv
+
+# Python bytecode
+__pycache__
+*.py[cod]
+.pytest_cache
+
+# Secret files
+.env
+private
+
+# Operating System Files
+.DS_Store

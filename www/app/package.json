@@ -1,7 +1,7 @@
 {
   "name": "kengpt",
   "version": "0.0.1",
-  "description": "KenGPT is a custom-built AI assistant.",
+  "description": "An Open-Source ChatBot Web App.",
   "scripts": {
     "debug": "webpack server --mode development --open --stats-error-details",
     "build": "webpack --mode production"

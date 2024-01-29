@@ -13,19 +13,17 @@ from model.chat import ChatRequest, ChatResponse, Role
 logger = logging.getLogger("uvicorn")
 
 
-def run_chatgpt(request: ChatRequest) -> ChatResponse:
-    logger.info("Running ChatGPT")
-    return ChatGPT()(request)
-
-
 class ChatGPT:
     """ChatGPT is a plugin that uses the OpenAI Assistant API to generate responses."""
 
     def __init__(self):
         openai.api_key = os.environ.get("OPENAI_API_KEY")
-        self.assistant = openai.beta.assistants.retrieve(
-            os.environ.get("OPENAI_ASSISTANT_ID")
-        )
+        if openai.api_key is None:
+            logger.warning("OPENAI_API_KEY not set")
+        self.assistant_id = os.environ.get("OPENAI_ASSISTANT_ID")
+        if self.assistant_id is None:
+            logger.warning("OPENAI_ASSISTANT_ID not set")
+        self.assistant = openai.beta.assistants.retrieve(self.assistant_id)
 
     def __call__(self, request: ChatRequest) -> ChatResponse:
         """Send a message to the OpenAI API and get a response."""
@@ -72,26 +70,3 @@ class ChatGPT:
             runtime=int((time() - start_time) * 1000),
             thread_id=thread.id,
         )
-
-
-def parse_to_openai(request: ChatRequest) -> List[Dict[str, str]]:
-    return file_to_memory(request.fileContent) + [
-        to_message(message.content) for message in request.memory
-    ]
-
-
-def to_message(content: str) -> Dict[str, str]:
-    """Convert a role and content to a message"""
-    return {"role": "user", "content": content}
-
-
-def file_to_memory(file: str) -> List[Dict[str, str]]:
-    """Convert a file to a list of messages"""
-    return (
-        [
-            to_message(f"Reference this file content:\n{file}"),
-            to_message("Understood. I will reference that file content."),
-        ]
-        if file
-        else []
-    )

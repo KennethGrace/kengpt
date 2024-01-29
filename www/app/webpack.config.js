@@ -6,7 +6,7 @@ const os = require("os");
 module.exports = {
   devServer: {
     allowedHosts: ["localhost", os.hostname()],
-    port: 8080,
+    port: 5000,
     static: path.join(__dirname, "..", "public"),
     headers: {
       mime: {
@@ -16,7 +16,8 @@ module.exports = {
     },
     proxy: {
       "/api": {
-        target: "http://localhost:8888",
+        target: "http://localhost:5001",
+        pathRewrite: { "^/api": "" },
       },
     },
   },

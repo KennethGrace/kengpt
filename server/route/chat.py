@@ -13,7 +13,7 @@ logger = logging.getLogger("uvicorn")
 ChatRouter = APIRouter(prefix="/chat")
 
 
-@ChatRouter.post("/", response_model=ChatResponse)
+@ChatRouter.post("", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse | HTTPException:
     """Send a message to the AI and get a response."""
     Chat = ChatService.get_instance()

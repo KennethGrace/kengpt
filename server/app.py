@@ -25,9 +25,10 @@ application = fastapi.FastAPI(
     title="KenGPT Service",
     description="The KenGPT Service serves natural language processing.",
     version="0.1.0",
+    root_path="/api",
 )
 
-application.include_router(ChatRouter, prefix="/api")
+application.include_router(ChatRouter)
 
 application.add_middleware(
     CORSMiddleware,

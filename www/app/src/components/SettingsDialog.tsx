@@ -141,6 +141,7 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
             fullWidth
             multiline
             rows={4}
+            disabled={draftSettings.botname.includes("KenGPT")}
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setDraftSettings({
                 ...draftSettings,
@@ -159,6 +160,7 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
             fullWidth
             multiline
             maxRows={4}
+            disabled={draftSettings.botname.includes("KenGPT")}
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setDraftSettings({
                 ...draftSettings,

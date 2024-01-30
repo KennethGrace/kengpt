@@ -21,7 +21,7 @@ const Viewport: FC = () => {
   const Loading = useMemo(() => {
     if (status === "running") {
       return (
-        <Fade in={status === "running"} timeout={2500}>
+        <Fade in={status === "running"} timeout={1500}>
           <Stack direction={"column"} spacing={1}>
             <LinearProgress
               variant="indeterminate"
@@ -29,7 +29,7 @@ const Viewport: FC = () => {
               sx={{ width: "100%", height: "8px" }}
             />
             <Typography
-              variant="overline"
+              variant="subtitle1"
               color={"text.secondary"}
               sx={{
                 textAlign: "center",
@@ -43,9 +43,8 @@ const Viewport: FC = () => {
     } else if (status === "standby") {
       return (
         <Typography
-          variant="overline"
+          variant="subtitle1"
           color={"text.secondary"}
-          title={`You are chatting with ${settings.botname}.`}
           sx={{
             textAlign: "center",
           }}
@@ -55,7 +54,7 @@ const Viewport: FC = () => {
       );
     }
     return null;
-  }, [status]);
+  }, [status, settings]);
 
   return (
     <Container

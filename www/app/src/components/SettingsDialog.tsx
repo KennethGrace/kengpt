@@ -9,6 +9,8 @@ import {
   DialogContent,
   TextField,
   Stack,
+  Divider,
+  MenuItem,
 } from "@mui/material";
 import { Save } from "@mui/icons-material";
 
@@ -32,8 +34,9 @@ interface SettingsDialogProps {
 }
 
 const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
-  const { settings, setSettings } = useChat();
+  const { settings, setSettings, profiles } = useChat();
   const { addNotification } = useNotifications();
+  const [selected, setSelected] = useState<string>(settings.botname);
   const [draftSettings, setDraftSettings] = useState<ChatSettings>(settings);
 
   const handleClose = () => {
@@ -43,14 +46,12 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
         severity: "error",
       });
       return;
-    } else if (draftSettings !== settings) {
+    } else {
       setSettings(draftSettings);
       addNotification({
-        message: "Your Settings have been Updated",
-        severity: "success",
+        message: `You are now chatting with ${draftSettings.botname}`,
+        severity: "info",
       });
-      setOpen(false);
-    } else {
       setOpen(false);
     }
   };
@@ -74,8 +75,32 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
       <DialogContent>
         <Stack direction={"column"} spacing={1}>
           <TextField
+            id="profile-select"
+            label="Profile"
+            aria-label="profile"
+            select
+            variant="filled"
+            value={selected}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              if (!profiles[event.target.value]) {
+                console.log(`Profile ${event.target.value} not found`);
+                return;
+              }
+              setSelected(event.target.value);
+              setDraftSettings(profiles[event.target.value]);
+            }}
+          >
+            {Object.keys(profiles).map((profile) => (
+              <MenuItem key={profile} value={profile}>
+                {profile}
+              </MenuItem>
+            ))}
+          </TextField>
+          <Divider />
+          <TextField
             id="username"
             label="Username"
+            aria-label="username"
             placeholder="Enter your username"
             variant="filled"
             size="small"
@@ -92,6 +117,7 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
           <TextField
             id="botname"
             label="Botname"
+            aria-label="botname"
             placeholder="Enter a Name for the Bot"
             variant="filled"
             size="small"
@@ -108,12 +134,14 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
           <TextField
             id="instruction"
             label="Instruction"
+            aria-label="instruction"
             placeholder="Enter a Custom Instruction"
             variant="filled"
             size="small"
             fullWidth
             multiline
             rows={4}
+            disabled={draftSettings.botname.includes("KenGPT")}
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setDraftSettings({
                 ...draftSettings,
@@ -125,12 +153,14 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
           <TextField
             id="acknowledgement"
             label="Acknowledgement"
+            aria-label="acknowledgement"
             placeholder="Provide an Example of the AI Acknowledging your Instruction"
             variant="filled"
             size="small"
             fullWidth
             multiline
             maxRows={4}
+            disabled={draftSettings.botname.includes("KenGPT")}
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setDraftSettings({
                 ...draftSettings,

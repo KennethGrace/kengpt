@@ -8,10 +8,13 @@ import {
   submitRequest,
   getCurrentSystem,
   ChatMessage,
+  ChatProfiles,
 } from "../../controllers/chat";
+import { DefaultSettings, DefaultProfiles } from "../../controllers/chat";
 
 interface ChatState extends ChatSystem {
   settings: ChatSettings;
+  profiles: ChatProfiles;
   memory: ChatMessage[];
   fileContent: string;
   sendRequest: (message: string) => Promise<void>;
@@ -22,13 +25,11 @@ interface ChatState extends ChatSystem {
 }
 
 const ChatContext = React.createContext<ChatState>({
-  settings: {
-    username: "You",
-    botname: "KenGPT",
-  },
+  settings: DefaultSettings,
+  profiles: DefaultProfiles,
   memory: [],
   fileContent: "",
-  status: Status.Loading,
+  status: Status.Standby,
   sendRequest: async () => {},
   setSettings: () => {},
   setFileContent: () => {},
@@ -42,10 +43,8 @@ export const ChatProvider: FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [hasLoaded, setHasLoaded] = useState<boolean>(false);
-  const [settings, setSettings] = useState<ChatSettings>({
-    username: "You",
-    botname: "KenGPT",
-  });
+  const [settings, setSettings] = useState<ChatSettings>(DefaultSettings);
+  const [profiles, setProfiles] = useState<ChatProfiles>(DefaultProfiles);
   const [memory, setMemory] = useState<ChatMessage[]>([]);
   const [threadId, setThreadId] = useState<string>();
   const [fileContent, setFileContent] = useState<string>("");
@@ -63,6 +62,15 @@ export const ChatProvider: FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const saveSettings = () => {
+    setProfiles((profiles) => ({
+      ...profiles,
+      [settings.botname]: settings,
+    }));
+    window.localStorage.setItem("settings", JSON.stringify(settings));
+    window.localStorage.setItem("profiles", JSON.stringify(profiles));
+  };
+
   useEffect(() => {
     // On memory change.
     if (hasLoaded) {
@@ -78,9 +86,10 @@ export const ChatProvider: FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     // On settings change.
-    if (hasLoaded) {
-      window.localStorage.setItem("settings", JSON.stringify(settings));
-    }
+    const s = window.localStorage.getItem("settings");
+    const p = window.localStorage.getItem("profiles");
+    if (!s || !p) saveSettings();
+    if (s || p) saveSettings();
   }, [settings]);
 
   useEffect(() => {
@@ -88,17 +97,12 @@ export const ChatProvider: FC<{ children: React.ReactNode }> = ({
     setTimeout(() => {
       let data = window.localStorage.getItem("memory");
       if (data) {
-        let d = JSON.parse(data) as {
+        const d = JSON.parse(data) as {
           threadId: string;
           memory: ChatMessage[];
         };
         setMemory(d.memory);
         setThreadId(d.threadId);
-      }
-      data = window.localStorage.getItem("settings");
-      if (data) {
-        let settings = JSON.parse(data);
-        setSettings(settings);
       }
       setHasLoaded(true);
     }, 100);
@@ -147,6 +151,7 @@ export const ChatProvider: FC<{ children: React.ReactNode }> = ({
         settings,
         memory,
         fileContent,
+        profiles,
         status: system.status,
         model: system.model,
         sendRequest,

@@ -123,7 +123,7 @@ const NotificationStack: FC = () => {
         <ListItem key={notification.uuid}>
           <Snackbar
             open={notification.open}
-            autoHideDuration={5000}
+            autoHideDuration={3000}
             TransitionComponent={TransitionLeft}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
             sx={{ height: "80px", marginTop: `${i * 90}px` }}

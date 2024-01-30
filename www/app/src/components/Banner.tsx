@@ -19,12 +19,14 @@ interface BannerProps {}
 
 const Banner: FC<BannerProps> = () => {
   const { clearMemory } = useChat();
-  const [manifest, setManifest] = useState<Partial<ManifestFile>>();
+  const [manifest, setManifest] = useState<Partial<ManifestFile> | undefined>(
+    getManifest()
+  );
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [confirmationOpen, setConfirmationOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    getManifest().then((manifest) => setManifest(manifest));
+    setManifest(getManifest());
   }, []);
 
   const handleClearMemory = () => {

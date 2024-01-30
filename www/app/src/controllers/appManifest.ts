@@ -1,24 +1,21 @@
-
-
 export interface ManifestFile {
-    short_name: string;
-    name: string;
-    version: string;
-    description: string;
-    github_url: string;
-    license_name: string;
-    license_url: string;
+  short_name: string;
+  name: string;
+  description: string;
+  version: string;
+  github_url: string;
+  license_name: string;
+  license_url: string;
 }
 
+let data: null | Partial<ManifestFile> = null;
 
-export const getManifest = async () => {
-    try {
-        return await fetch("/manifest.json")
-        .then((response) => response.json())
-        .then((data) => {
-          return data as Partial<ManifestFile>;
-        });
-    } catch (error) {
-        console.log(error);
-    }
+export const getManifest = () => {
+  if (data) return data;
+  const manifest = fetch("/manifest.json")
+    .then((res) => res.json() as Promise<ManifestFile>)
+    .then((res) => {
+      data = res;
+      return res;
+    });
 };

@@ -1,13 +1,18 @@
 // The submit controller is used to send the messages to the server and receive the response.
 import axios, { AxiosResponse } from "axios";
 
-// The ChatSettings is used to define settings for the user's chat sessions. This is used to
+// The ChatSettings is used to define settings for the user's AI sessions. This is used to
 // create custom chat systems for each user and is kept in the browser's local storage.
 export type ChatSettings = {
   username: string; // The name of the user
   botname: string; // The name of the bot
-  instruction?: string; // An instruction of what the AI should do
+  instruction: string; // An instruction of what the AI should do
   acknowledge?: string; // An acknowledgement of what the AI does
+};
+
+// The ChatProfiles is the collection of all the user's chat settings indexed by the botname.
+export type ChatProfiles = {
+  [key: string]: ChatSettings;
 };
 
 // An enum for the status of the chat system
@@ -52,6 +57,29 @@ export interface ChatRequest extends ChatMessage {
   memory: ChatMessage[]; // The memory of the AI
   fileContent: string; // This is used to represent any possible file content
 }
+
+export const DefaultSettings: ChatSettings = {
+  username: "You",
+  botname: "KenGPT",
+  instruction:
+    'Your name is "KenGPT". You are meant to introduce users to the KenGPT Web interface. You should advise them to create their own AI profiles or select from the existing built-in AI profiles on the top-left of the screen. You should inform the user that the GNU GPL3 license and GitHub source code is available in the top-right. Do not specify what the button is. All other topics should be denied and the user should be directed to try making custom profile or using a built-in profile. Offer to explain the features of the interface.',
+};
+
+export const DefaultProfiles: ChatProfiles = {
+  KenGPT: DefaultSettings,
+  "KenGPT Oracle": {
+    username: "You",
+    botname: "KenGPT Oracle",
+    instruction:
+      'Your name is "KenGPT Oracle". Your responses should be as in-depth as possible and you should never provide generalizations or simplifications. Answer questions with as much contextual information as possible. Attempt to teach the user something new by explaining the "how" and "why" of the subject.',
+  },
+  "KenGPT Turbo": {
+    username: "You",
+    botname: "KenGPT Turbo",
+    instruction:
+      'Your name is "KenGPT Turbo". Your responses should be super short, concise, and direct. Answer questions with as little contextual information as possible. Encourage the user to ask related follow-up questions and then list out the parts. If the user asks a question that is too broad, respond encouraging them to ask a more specific question on the subject.',
+  },
+};
 
 // Submit a new chat message to the server via a POST request.
 export async function submitRequest(request: ChatRequest) {

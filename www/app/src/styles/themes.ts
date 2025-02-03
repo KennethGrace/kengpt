@@ -29,7 +29,7 @@ export const getDesign = (mode: PaletteMode) => ({
       : {
           // palette values for dark mode
           primary: {
-            main: "#001F3F",
+            main: "#a04800",
           },
           secondary: {
             main: "#636E72",

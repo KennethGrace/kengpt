@@ -10,18 +10,29 @@ import {
   Fade,
 } from "@mui/material";
 
-import { useChat } from "./shared/ChatProvider";
-import MessageBox from "./common/MessageBox";
+import { useChat } from "./contexts/ChatProvider";
+import Message from "./Message";
 
 const InputField = lazy(() => import("./InputField"));
 
 const Viewport: FC = () => {
-  const { memory, status, settings } = useChat();
+  const { localState, remoteState } = useChat();
 
   const Loading = useMemo(() => {
-    if (status === "running") {
+    if (!localState.activeProfile) return (
+      <Typography
+        variant="subtitle1"
+        color={"text.secondary"}
+        sx={{
+          textAlign: "center",
+        }}
+      >
+        Loading...
+      </Typography>
+    )
+    if (remoteState.status === "running") {
       return (
-        <Fade in={status === "running"} timeout={1500}>
+        <Fade in={remoteState.status === "running"} timeout={1500}>
           <Stack direction={"column"} spacing={1}>
             <LinearProgress
               variant="indeterminate"
@@ -35,12 +46,12 @@ const Viewport: FC = () => {
                 textAlign: "center",
               }}
             >
-              Contacting {settings.botname}...
+              Contacting {localState.activeProfile.botname}...
             </Typography>
           </Stack>
         </Fade>
       );
-    } else if (status === "standby") {
+    } else if (remoteState.status === "standby") {
       return (
         <Typography
           variant="subtitle1"
@@ -49,12 +60,12 @@ const Viewport: FC = () => {
             textAlign: "center",
           }}
         >
-          You are chatting with {settings.botname}.
+          You are chatting with {localState.activeProfile.botname}.
         </Typography>
       );
     }
     return null;
-  }, [status, settings]);
+  }, [remoteState.status, localState.activeProfile]);
 
   return (
     <Container
@@ -75,10 +86,14 @@ const Viewport: FC = () => {
             overflow: "auto",
           }}
         >
-          <Stack direction={"column"} spacing={1}>
-            {memory.map((message, i) => (
-              <MessageBox
-                key={message.timestamp}
+          <Stack direction={"column"} spacing={1}
+            sx={{
+              overflow: "clip",
+            }}
+          >
+            {localState.memory && localState.memory.map((message, i) => (
+              <Message
+                key={message.timestamp || i}
                 message={message}
                 position={i}
               />

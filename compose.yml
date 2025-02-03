@@ -1,0 +1,48 @@
+---
+version: '3.8'
+services:
+  web:
+    build:
+      context: ./www
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - API_URI=service:8080
+    networks:
+      - internal
+    depends_on:
+      - service
+  service:
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    expose:
+      - "8080"
+    environment:
+      - API_SECRET_FILE=/run/secrets/api_secret
+      - OLLAMA_API_URL=http://ollama:11434
+    volumes:
+      - ./secrets/api_secret:/run/secrets/api_secret:ro
+    networks:
+      - internal
+  
+  ollama:
+    image: ollama/ollama:latest
+    expose:
+      - "11434"
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - /usr/share/ollama/.ollama:/root/.ollama
+    networks:
+      - internal
+    devices:
+      - nvidia.com/gpu=all
+    security_opt:
+      - label=disable
+    entrypoint: ["ollama", "serve"]
+networks:
+  internal:
+    name: internal
+    driver: bridge

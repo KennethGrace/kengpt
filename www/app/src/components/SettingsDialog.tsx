@@ -11,13 +11,15 @@ import {
   Stack,
   Divider,
   MenuItem,
+  useTheme,
 } from "@mui/material";
-import { Save } from "@mui/icons-material";
+import { Add, Save } from "@mui/icons-material";
 
 import { TransitionProps } from "@mui/material/transitions";
-import { ChatSettings } from "../controllers/chat";
-import { useChat } from "./shared/ChatProvider";
-import { useNotifications } from "./shared/NotificationProvider";
+import { ChatProfile } from "../controllers/chat";
+import { useChat } from "./contexts/ChatProvider";
+import { useNotifications } from "./contexts/NotificationProvider";
+import ModelAutocomplete from "./setting/ModelAutocomplete";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -33,36 +35,44 @@ interface SettingsDialogProps {
   setOpen: (open: boolean) => void;
 }
 
+const BlankSettings = { botname: "New Bot", username: "You", instruction: "You are an AI Assistant." }
+
 const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
-  const { settings, setSettings, profiles } = useChat();
+  const theme = useTheme();
+  const { localState: {
+    activeProfile,
+    profiles,
+    setActiveProfile
+  } } = useChat();
   const { addNotification } = useNotifications();
-  const [selected, setSelected] = useState<string>(settings.botname);
-  const [draftSettings, setDraftSettings] = useState<ChatSettings>(settings);
+  const [selected, setSelected] = useState<string | null>(activeProfile ? activeProfile.botname : null);
+  const [viewProfile, setViewProfile] = useState<ChatProfile>(activeProfile);
 
   const handleClose = () => {
+    if (!viewProfile) {
+      setOpen(false);
+      return;
+    }
     if (!validSettings) {
       addNotification({
-        message: "Your Settings are Invalid",
-        severity: "error",
+        message: "Failed to Save Profile.",
+        severity: "warning",
       });
-      return;
     } else {
-      setSettings(draftSettings);
-      addNotification({
-        message: `You are now chatting with ${draftSettings.botname}`,
-        severity: "info",
-      });
-      setOpen(false);
+      setActiveProfile(viewProfile);
     }
+    setOpen(false);
   };
 
   const validSettings = useMemo(() => {
-    return draftSettings.username !== "" && draftSettings.botname !== "";
-  }, [draftSettings]);
+    if (!viewProfile) return false;
+    return viewProfile.botname !== "" && viewProfile.instruction !== "";
+  }, [viewProfile]);
 
   return (
     <Dialog
       open={open}
+      fullWidth
       TransitionComponent={Transition}
       onClose={handleClose}
       sx={{
@@ -73,7 +83,7 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
     >
       <DialogTitle textAlign={"center"}>Settings</DialogTitle>
       <DialogContent>
-        <Stack direction={"column"} spacing={1}>
+        <Stack direction={"column"} spacing={2}>
           <TextField
             id="profile-select"
             label="Profile"
@@ -87,49 +97,46 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
                 return;
               }
               setSelected(event.target.value);
-              setDraftSettings(profiles[event.target.value]);
+              setViewProfile(profiles[event.target.value]);
             }}
           >
-            {Object.keys(profiles).map((profile) => (
-              <MenuItem key={profile} value={profile}>
-                {profile}
-              </MenuItem>
-            ))}
+            {profiles && Object.keys(profiles)
+              .map((profile) => (
+                <MenuItem key={profile} value={profile}>
+                  {profile}
+                </MenuItem>
+              ))
+              .concat([
+                <MenuItem
+                  key="custom"
+                  value="custom"
+                  onClick={() => {
+                    setSelected("custom");
+                    setViewProfile(BlankSettings);
+                  }}
+                >
+                  Add a new Custom Profile
+                </MenuItem>,
+              ])}
           </TextField>
           <Divider />
-          <TextField
-            id="username"
-            label="Username"
-            aria-label="username"
-            placeholder="Enter your username"
-            variant="filled"
-            size="small"
-            fullWidth
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-              setDraftSettings({
-                ...draftSettings,
-                username: event.target.value,
-              })
-            }
-            value={draftSettings.username}
-            error={draftSettings.username === ""}
-          />
           <TextField
             id="botname"
             label="Botname"
             aria-label="botname"
-            placeholder="Enter a Name for the Bot"
+            placeholder="Enter your botname"
             variant="filled"
             size="small"
             fullWidth
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-              setDraftSettings({
-                ...draftSettings,
+            disabled={viewProfile ? viewProfile.botname.includes("KenGPT") : false}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              setViewProfile({
+                ...viewProfile || BlankSettings,
                 botname: event.target.value,
               })
-            }
-            value={draftSettings.botname}
-            error={draftSettings.botname === ""}
+            }}
+            value={viewProfile ? viewProfile.botname : ""}
+            error={viewProfile ? viewProfile.botname === "" : true}
           />
           <TextField
             id="instruction"
@@ -140,34 +147,24 @@ const SettingsDialog: FC<SettingsDialogProps> = ({ open, setOpen }) => {
             size="small"
             fullWidth
             multiline
-            rows={4}
-            disabled={draftSettings.botname.includes("KenGPT")}
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-              setDraftSettings({
-                ...draftSettings,
+            rows={8}
+            disabled={viewProfile ? viewProfile.botname.includes("KenGPT") : false}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              setViewProfile({
+                ...viewProfile || BlankSettings,
                 instruction: event.target.value,
               })
-            }
-            value={draftSettings.instruction}
+            }}
+            value={viewProfile ? viewProfile.instruction : ""}
           />
-          <TextField
-            id="acknowledgement"
-            label="Acknowledgement"
-            aria-label="acknowledgement"
-            placeholder="Provide an Example of the AI Acknowledging your Instruction"
-            variant="filled"
-            size="small"
-            fullWidth
-            multiline
-            maxRows={4}
-            disabled={draftSettings.botname.includes("KenGPT")}
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-              setDraftSettings({
-                ...draftSettings,
-                acknowledge: event.target.value,
+          <ModelAutocomplete
+            value={viewProfile.model || ""}
+            onChange={(value: string) => {
+              setViewProfile({
+                ...viewProfile || BlankSettings,
+                model: value === "" ? undefined : value,
               })
-            }
-            value={draftSettings.acknowledge}
+            }}
           />
         </Stack>
       </DialogContent>

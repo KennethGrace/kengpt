@@ -9,7 +9,7 @@ import {
   IconButton,
   Button,
 } from "@mui/material";
-import { CheckCircle, Cancel } from "@mui/icons-material";
+import { CheckCircle, Cancel, Delete } from "@mui/icons-material";
 
 import { TransitionProps } from "@mui/material/transitions";
 
@@ -38,13 +38,19 @@ const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   title = "Confirm Action",
 }) => {
   return (
-    <Dialog open={open} TransitionComponent={Transition}>
+    <Dialog
+      open={open}
+      TransitionComponent={Transition}
+      keepMounted
+      onClose={onDeny}
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>{message}</DialogContent>
       <DialogActions>
         <Button
           aria-label="Cancel"
-          color="error"
+          color="inherit"
+          variant="outlined"
           onClick={onDeny}
           endIcon={<Cancel />}
         >
@@ -52,9 +58,10 @@ const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
         </Button>
         <Button
           aria-label="Confirm"
-          color="success"
+          variant="contained"
+          color="error"
           onClick={onConfirm}
-          endIcon={<CheckCircle />}
+          endIcon={<Delete />}
         >
           Confirm
         </Button>

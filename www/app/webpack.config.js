@@ -6,7 +6,7 @@ const os = require("os");
 module.exports = {
   devServer: {
     allowedHosts: ["localhost", os.hostname()],
-    port: 5000,
+    port: 7080,
     static: path.join(__dirname, "..", "public"),
     headers: {
       mime: {

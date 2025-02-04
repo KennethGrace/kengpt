@@ -10,12 +10,8 @@ export interface ManifestFile {
 
 let data: null | Partial<ManifestFile> = null;
 
-export const getManifest = () => {
+export const getManifest = async () => {
   if (data) return data;
-  const manifest = fetch("/manifest.json")
-    .then((res) => res.json() as Promise<ManifestFile>)
-    .then((res) => {
-      data = res;
-      return res;
-    });
+  const manifest = await fetch("/manifest.json");
+  return manifest.json();
 };

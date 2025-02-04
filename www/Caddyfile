@@ -1,0 +1,14 @@
+:80 {
+
+    # 1) /api/*: Reverse-proxy to environment variable API_URI
+    handle /api/* {
+        reverse_proxy {env.API_URI}
+    }
+
+    # 2) All other requests: Serve from /usr/share/caddy
+    handle {
+        root * /usr/share/caddy
+        file_server
+        try_files {path} /index.html
+    }
+}

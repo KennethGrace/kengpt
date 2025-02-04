@@ -1,4 +1,4 @@
-import React, { FC, lazy, useEffect, useState } from "react";
+import React, { FC, lazy, useEffect, useMemo, useState } from "react";
 
 import {
   AppBar,
@@ -10,7 +10,7 @@ import {
 
 import { Balance, GitHub, History, Settings } from "@mui/icons-material";
 import { getManifest, ManifestFile } from "../controllers/appManifest";
-import { useChat } from "./shared/ChatProvider";
+import { useChat } from "./contexts/ChatProvider";
 
 const SettingsDialog = lazy(() => import("./SettingsDialog"));
 const ConfirmationDialog = lazy(() => import("./ConfirmationDialog"));
@@ -18,21 +18,28 @@ const ConfirmationDialog = lazy(() => import("./ConfirmationDialog"));
 interface BannerProps {}
 
 const Banner: FC<BannerProps> = () => {
-  const { clearMemory } = useChat();
-  const [manifest, setManifest] = useState<Partial<ManifestFile> | undefined>(
-    getManifest()
-  );
+  const { localState:{
+    activeProfile,
+  }, clearMemory } = useChat();
+  const [manifest, setManifest] = useState<Partial<ManifestFile> | undefined>();
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [confirmationOpen, setConfirmationOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    setManifest(getManifest());
+    getManifest().then((manifest) => setManifest(manifest));
   }, []);
 
   const handleClearMemory = () => {
     clearMemory();
     setConfirmationOpen(false);
   };
+
+  const bannerTitle = useMemo(() => {
+    if (!activeProfile) return "KenGPT";
+    if (activeProfile.botname === "") return ("KenGPT");
+    if (activeProfile.botname.includes("GPT")) return activeProfile.botname;
+    return `${activeProfile.botname}GPT`;
+  }, [activeProfile, manifest?.name]);
 
   return (
     <AppBar
@@ -83,7 +90,7 @@ const Banner: FC<BannerProps> = () => {
         }}
       >
         <Typography variant="h5" fontWeight={"bold"} noWrap>
-          {manifest?.name ?? "KenGPT"}
+          {bannerTitle}
         </Typography>
       </Toolbar>
 

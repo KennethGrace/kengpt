@@ -8,13 +8,13 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useChat } from "./shared/ChatProvider";
-import { AttachFile, Send } from "@mui/icons-material";
-import { useNotifications } from "./shared/NotificationProvider";
+import { useChat } from "./contexts/ChatProvider";
+import { VolumeOff, VolumeUp, Send } from "@mui/icons-material";
+import { useNotifications } from "./contexts/NotificationProvider";
 
 const InputField: FC = () => {
   const { addNotification } = useNotifications();
-  const { sendRequest } = useChat();
+  const { sendRequest, setSpeakAloud, speakAloud } = useChat();
   const [draftMessage, setDraftMessage] = useState<string>("");
 
   const handleSendMessage = () => {
@@ -43,8 +43,11 @@ const InputField: FC = () => {
           variant="filled"
           size="small"
           fullWidth
-          multiline
-          maxRows={10}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              handleSendMessage();
+            }
+          }}
           onChange={(event: ChangeEvent<HTMLInputElement>) =>
             setDraftMessage(event.target.value)
           }
@@ -59,14 +62,15 @@ const InputField: FC = () => {
         >
           <Stack direction={"row"} spacing={1} height={"100%"}>
             <IconButton
-              aria-label="file"
-              //onClick={() => sendMessage(draft)}
+              aria-label="speak-aloud"
+              onClick={() => setSpeakAloud(!speakAloud)}
               size={"medium"}
             >
-              <AttachFile />
+              {speakAloud ? <VolumeUp /> : <VolumeOff />}
             </IconButton>
             <Button
               aria-label="send"
+              color="primary"
               onClick={handleSendMessage}
               size={"medium"}
               variant="contained"

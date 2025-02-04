@@ -7,7 +7,8 @@ node_modules
 package-lock.json
 
 # Python Environment
-venv
+*venv
+.python-version
 
 # Python bytecode
 __pycache__
@@ -16,7 +17,8 @@ __pycache__
 
 # Secret files
 .env
-private
+*private
+*secrets
 
 # Operating System Files
 .DS_Store

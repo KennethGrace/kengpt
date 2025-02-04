@@ -13,7 +13,7 @@ else
 fi
 
 # Install the dependencies
-${python} -m pip install -r requirements.txt
+# ${python} -m pip install -r requirements.txt
 
 # Run the server with debug mode
 ${python} -m uvicorn app:application --host 0.0.0.0 --port 5001 \

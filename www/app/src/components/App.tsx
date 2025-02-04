@@ -9,8 +9,8 @@ import React, {
 
 import { Box } from "@mui/material";
 
-import NotificationsProvider from "./shared/NotificationProvider";
-import ChatProvider from "./shared/ChatProvider";
+import NotificationsProvider from "./contexts/NotificationProvider";
+import ChatProvider from "./contexts/ChatProvider";
 
 const Viewport = lazy(() => import("./Viewport"));
 const Banner = lazy(() => import("./Banner"));
